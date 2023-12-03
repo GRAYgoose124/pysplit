@@ -17,8 +17,6 @@ def this_exe():
 
 
 # pragma: newfile("database.py")
-
-
 class DatabaseConnector:
     def connect(self):
         return sqlite3.connect("database.db")
@@ -31,8 +29,6 @@ def query_database(query):
 
 
 # pragma: newfile("network.py")
-
-
 class NetworkRequester:
     def fetch(self, url):
         return requests.get(url)
@@ -43,8 +39,6 @@ def send_request(url):
 
 
 # pragma: newfile("math_operations.py")
-
-
 class MathOperations:
     def add(self, a, b):
         return a + b
