@@ -21,7 +21,7 @@ def split_file_into_module(filename):
 def extract_exports(lines):
     exports = []
     for line in lines:
-        match = re.match(r"^\s*(def|class)\s+(\w+)", line)
+        match = re.match(r"^(def|class)\s+(\w+)", line)
         if match:
             exports.append(match.group(2))
     return exports
