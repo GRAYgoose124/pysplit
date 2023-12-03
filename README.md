@@ -22,7 +22,7 @@ pysplit your_python_file.py
 
 Watch as your file is transformed into a tidy module with smaller files. This new directory module can be imported or ran similarly to the original file!
 
-Testing
+# Testing
 Run the tests with the unittest module:
 
 ```bash 

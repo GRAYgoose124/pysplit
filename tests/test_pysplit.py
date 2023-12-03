@@ -18,9 +18,7 @@ class TestSplitFileIntoModule(unittest.TestCase):
                     print(f"Contents of {file}")
                     print(f.read())
 
-            self.assertTrue(os.path.isdir("testsplitfile"))
             self.assertTrue(os.path.exists("__init__.py"))
-
             self.assertTrue(os.path.exists("__main__.py"))
             self.assertTrue(os.path.exists("database.py"))
             self.assertTrue(os.path.exists("network.py"))

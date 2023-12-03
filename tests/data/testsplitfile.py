@@ -4,6 +4,9 @@ import sqlite3
 import requests
 
 
+# This will be included with the main file, if you want to ensure that
+# it is exported as part of the library, add a newfile pragma before any
+# code you want to export via __all__.
 class UtilityClass:
     def method_one(self):
         return "Method one of UtilityClass"

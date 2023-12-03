@@ -71,10 +71,9 @@ def split_file_into_module(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
 
+    exports, imports = {}, {}
+    file_contents, up_to_first_pragma = {}, []
     current_file = None
-    file_contents = {}
-    all_exports = {}
-    imports = {}
 
     for line in lines:
         # track imports
@@ -87,56 +86,67 @@ def split_file_into_module(filename):
         pragma_match = re.match(r'# pragma: newfile\("(.+)"\)', line)
         if pragma_match:
             if current_file:
-                all_exports[current_file] = extract_exports(file_contents[current_file])
+                exports[current_file] = extract_exports(file_contents[current_file])
+
             current_file = pragma_match.group(1)
             file_contents[current_file] = []
         # append to the current file
         elif current_file:
             file_contents[current_file].append(line)
+        else:
+            # this is the main block
+            up_to_first_pragma.append(line)
 
     # extract exports
     if current_file:
-        all_exports[current_file] = extract_exports(file_contents[current_file])
+        exports[current_file] = extract_exports(file_contents[current_file])
 
     # create the new files
     for new_filename, contents in file_contents.items():
-        exports = all_exports[new_filename]
+        used_exports = exports[new_filename]
         used_imports = parse_body_for_used_ports(contents, imports)
-        print(
-            f"Creating {new_filename} with exports {exports} and imports {used_imports}"
-        )
+
         with open(new_filename, "w") as new_file:
             for name in used_imports:
                 if name in imports:
                     new_file.write(imports[name])
-            if exports:
-                new_file.write(f"__all__ = {exports}\n")
+            if used_exports:
+                new_file.write(f"__all__ = {used_exports}\n")
             new_file.writelines(contents)
     created_filenames = list(file_contents.keys())
 
     # Update the __init__ file to re-export symbols from the new module directory like the old file.
     with open("__init__.py", "w") as file:
-        for new_filename, exports in all_exports.items():
-            if exports:
+        for new_filename, used_exports in exports.items():
+            if used_exports:
                 module_name = re.sub(r"\.py$", "", new_filename)
                 file.write(f"from .{module_name} import *\n")
-        file.write(f"\n__all__ = {[x for y in all_exports.values() for x in y]}")
+        file.write(f"\n__all__ = {[x for y in exports.values() for x in y]}")
     created_filenames.append("__init__.py")
 
-    main_block = detect_main_block(lines)
+    # Detect the main block and create a __main__.py file with the appropriate module imports
+    up_to_first_pragma = [
+        line
+        for line in up_to_first_pragma
+        if not (line.startswith("import ") or line.startswith("from "))
+    ]
+    main_block = up_to_first_pragma + detect_main_block(lines)
     if main_block is not None:
         with open("__main__.py", "w") as main_file:
-            # Add necessary imports
+            # Add necessary exports
             used_exports = parse_body_for_used_ports(
-                main_block, [x for y in all_exports.values() for x in y]
+                main_block, [x for y in exports.values() for x in y]
             )
             for name in used_exports:
-                print(f"Used export {name}")
                 main_file.write(f"from . import {name}\n")
+
+            # Add necessary imports
+            used_imports = parse_body_for_used_ports(up_to_first_pragma, imports)
+            for name in used_imports:
+                main_file.write(imports[name])
 
             # Add the main block or call main()
             main_file.write("\n\n" + "".join(main_block))
         created_filenames.append("__main__.py")
 
-    print(f"{created_filenames=}")
     return created_filenames
