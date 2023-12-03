@@ -1,2 +1,4 @@
 *.lock
 *.pyc
+*.egg-info
+dist/
