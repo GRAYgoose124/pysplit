@@ -15,7 +15,7 @@ def split_file_into_module(filename):
     - Top-level functions and classes will be exported in the __all__ variable in the
     __init__.py file.
     """
-    split_file(filename)
+    return split_file(filename)
 
 
 def extract_exports(lines):
@@ -78,9 +78,11 @@ def split_file(filename):
         elif current_file:
             file_contents[current_file].append(line)
 
+    # extract exports
     if current_file:
         all_exports[current_file] = extract_exports(file_contents[current_file])
 
+    # create the new files
     for new_filename, contents in file_contents.items():
         exports = all_exports[new_filename]
         used_imports = parse_body_for_used_imports(contents, imports)
@@ -94,13 +96,16 @@ def split_file(filename):
             if exports:
                 new_file.write(f"__all__ = {exports}\n")
             new_file.writelines(contents)
+    created_filenames = list(file_contents.keys())
 
-    # Update the original file to re-export symbols
+    # Update the __init__ file to re-export symbols from the new module directory like the old file.
     with open("__init__.py", "w") as file:
         for new_filename, exports in all_exports.items():
             if exports:
                 module_name = re.sub(r"\.py$", "", new_filename)
-                file.write(f"from {module_name} import *\n")
+                file.write(f"from .{module_name} import *\n")
         file.write(f"\n__all__ = {[x for y in all_exports.values() for x in y]}")
+    created_filenames.append("__init__.py")
 
-    return list(file_contents.keys())
+    print(f"{created_filenames=}")
+    return created_filenames

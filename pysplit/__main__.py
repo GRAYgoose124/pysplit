@@ -22,7 +22,17 @@ def main():
 
     # create a new dir now named after the original file
     directory = Path(args.filename).stem
-    Path(directory).mkdir(exist_ok=True)
+    if Path(directory).exists():
+        answer = input(
+            f"Directory {directory} already exists. Overwrite? [y/N] "
+        ).lower()
+        if answer != "y":
+            print("Aborting.")
+            sys.exit(1)
+        else:
+            shutil.rmtree(directory)
+
+    Path(directory).mkdir()
     print(f"Created directory: {directory}")
 
     # move the original file into the new dir
