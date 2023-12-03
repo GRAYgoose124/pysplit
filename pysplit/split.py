@@ -23,12 +23,11 @@ def detect_main_block(lines):
 
 
 def extract_exports(lines):
-    exports = []
-    for line in lines:
-        match = re.match(r"^(def|class)\s+(\w+)", line)
-        if match:
-            exports.append(match.group(2))
-    return exports
+    return [
+        match.group(2)
+        for line in lines
+        if (match := re.match(r"^(def|class)\s+(\w+)", line))
+    ]
 
 
 def parse_imports(line):
@@ -39,20 +38,12 @@ def parse_imports(line):
                 yield alias.name
 
 
-def parse_possible_port_references(lines):
+def parse_body_for_used_ports(lines, ports):
     tree = ast.parse("".join(lines))
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
-            yield node.id
-
-
-def parse_body_for_used_ports(lines, ports):
-    """Parse the body of a file to find which imports are actually referenced"""
-    used_imports = set()
-    for name in parse_possible_port_references(lines):
-        if name in ports:
-            used_imports.add(name)
-    return used_imports
+            if node.id in ports:
+                yield node.id
 
 
 def split_file_into_module(filename):
