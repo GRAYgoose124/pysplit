@@ -2,20 +2,24 @@ import re
 import ast
 
 
-def split_file_into_module(filename):
-    """Split a file into a module
+def detect_main_block(lines):
+    """Detect the main block of code in a file, whether it's in a function or if statement.
 
-    Usage:
-
-    Apply # pragma: newfile("filename.py") at each point where you want to split the file.
-    The new file will be created with the contents of the file between the previous pragma
-    and the current pragma.
-
-    - Imports will be automatically copied to the appropriate files.
-    - Top-level functions and classes will be exported in the __all__ variable in the
-    __init__.py file.
+    Then return the whole block, including the if statement or def main .
     """
-    return split_file(filename)
+    main_block = []
+    in_main_block = False
+    for line in lines:
+        if in_main_block:
+            main_block.append(line)
+        elif re.match(r"if __name__ == \"__main__\":", line):
+            in_main_block = True
+            main_block.append(line)
+        elif re.match(r"def main\(\):", line):
+            in_main_block = True
+            main_block.append(line)
+    if main_block:
+        return main_block
 
 
 def extract_exports(lines):
@@ -35,23 +39,35 @@ def parse_imports(line):
                 yield alias.name
 
 
-def parse_possible_import_references(lines):
+def parse_possible_port_references(lines):
     tree = ast.parse("".join(lines))
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
             yield node.id
 
 
-def parse_body_for_used_imports(lines, imports):
+def parse_body_for_used_ports(lines, ports):
     """Parse the body of a file to find which imports are actually referenced"""
     used_imports = set()
-    for name in parse_possible_import_references(lines):
-        if name in imports:
+    for name in parse_possible_port_references(lines):
+        if name in ports:
             used_imports.add(name)
     return used_imports
 
 
-def split_file(filename):
+def split_file_into_module(filename):
+    """Split a file into a module
+
+    Usage:
+
+    Apply # pragma: newfile("filename.py") at each point where you want to split the file.
+    The new file will be created with the contents of the file between the previous pragma
+    and the current pragma.
+
+    - Imports will be automatically copied to the appropriate files.
+    - Top-level functions and classes will be exported in the __all__ variable in the
+    __init__.py file.
+    """
     with open(filename, "r") as file:
         lines = file.readlines()
 
@@ -85,7 +101,7 @@ def split_file(filename):
     # create the new files
     for new_filename, contents in file_contents.items():
         exports = all_exports[new_filename]
-        used_imports = parse_body_for_used_imports(contents, imports)
+        used_imports = parse_body_for_used_ports(contents, imports)
         print(
             f"Creating {new_filename} with exports {exports} and imports {used_imports}"
         )
@@ -106,6 +122,21 @@ def split_file(filename):
                 file.write(f"from .{module_name} import *\n")
         file.write(f"\n__all__ = {[x for y in all_exports.values() for x in y]}")
     created_filenames.append("__init__.py")
+
+    main_block = detect_main_block(lines)
+    if main_block is not None:
+        with open("__main__.py", "w") as main_file:
+            # Add necessary imports
+            used_exports = parse_body_for_used_ports(
+                main_block, [x for y in all_exports.values() for x in y]
+            )
+            for name in used_exports:
+                print(f"Used export {name}")
+                main_file.write(f"from . import {name}\n")
+
+            # Add the main block or call main()
+            main_file.write("\n\n" + "".join(main_block))
+        created_filenames.append("__main__.py")
 
     print(f"{created_filenames=}")
     return created_filenames

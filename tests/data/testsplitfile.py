@@ -49,3 +49,12 @@ class MathOperations:
 
 def subtract(a, b):
     return a - b
+
+
+if __name__ == "__main__":
+    print("This is the main file.")
+    MO = MathOperations()
+    print(MO.add(1, 2))
+    print(subtract(1, 2))
+    print(send_request("http://example.com"))
+    print(this_exe())
