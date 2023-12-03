@@ -1,11 +1,12 @@
 import unittest
+from pathlib import Path
 import os, tempfile, shutil
 from pysplit import split_file_into_module
 
 
 class TestSplitFileIntoModule(unittest.TestCase):
     def test_split_file_into_module(self):
-        path = "./data/testsplitfile.py"
+        path = Path(__file__).parent / "data/testsplitfile.py"
         with tempfile.TemporaryDirectory() as tmpdirname:
             shutil.copy(path, tmpdirname)
             os.chdir(tmpdirname)

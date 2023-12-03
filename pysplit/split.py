@@ -102,3 +102,5 @@ def split_file(filename):
                 module_name = re.sub(r"\.py$", "", new_filename)
                 file.write(f"from {module_name} import *\n")
         file.write(f"\n__all__ = {[x for y in all_exports.values() for x in y]}")
+
+    return list(file_contents.keys())
