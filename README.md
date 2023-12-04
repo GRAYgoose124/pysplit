@@ -1,27 +1,24 @@
 
-# PySplit
+# monosplit
 
-PySplit is your friendly neighborhood Python file splitter! It takes a hefty Python file and splits it into a neat module with smaller, manageable files. It's not too stupid, either!  It figures out which imports are needed in each new file and keeps them intact. If a main function or standard main block is detected, it's moved the new module main at `__main__.py`.
+monosplit is your friendly neighborhood Python file splitter! It takes a hefty Python file and splits it into a neat module with smaller, manageable files. It's not too stupid, either!  It figures out which imports are needed in each new file and keeps them intact. If a main function or standard main block is detected, it's moved the new module main at `__main__.py`.
 
 # Installation
-PySplit is available on PyPI! Install it with pip:
+monosplit is available on PyPI! Install it with pip:
 
 ```bash
 pip install monosplit
 ```
 
-> TODO: rename to monosplit :x
-
 ```bash 
 git clone https://github.com/GRAYgoose124/pysplit.git 
-pip install [-e] pysplit 
+pip install [-e] monosplit 
 ```
 
 # Usage
-Unleash PySplit on your Python file with a simple command:
-
+Add some `# pragma newfile("name")` statements to the file you want to split and run:
 ```bash 
-pysplit your_python_file.py
+monosplit your_python_file.py
 ```
 
 Watch as your file is transformed into a tidy module with smaller files. This new directory module can be imported or ran similarly to the original file!

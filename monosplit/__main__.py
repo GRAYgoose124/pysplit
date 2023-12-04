@@ -1,4 +1,4 @@
-import sys, shutil
+import sys, shutil, os
 import argparse
 from pathlib import Path
 
@@ -33,10 +33,19 @@ def main():
     Path(directory).mkdir()
     print(f"Created directory: {directory}")
 
-    # move the original file into the new dir
+    # move the created files into the new dir
     for name in created_filenames:
         Path(name).rename(Path(directory) / name)
     print(f"Moved the created files into {directory}")
+
+    # format with black if available, kinda hacky.
+    try:
+        import black
+
+        print("Formatting with black...")
+        black.main([directory])
+    except ImportError:
+        print("Black not found, skipping formatting.")
 
 
 if __name__ == "__main__":

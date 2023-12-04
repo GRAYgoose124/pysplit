@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 import os, tempfile, shutil
-from pysplit import split_file_into_module
+from monosplit import split_file_into_module
 
 
 class TestSplitFileIntoModule(unittest.TestCase):
