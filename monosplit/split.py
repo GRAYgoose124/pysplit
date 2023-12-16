@@ -106,10 +106,13 @@ def parse_body_for_all_imports(tree):
 
 
 def parse_body_for_used_ports(tree, ports):
+    used_ports = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
             if node.id in ports:
-                yield node.id
+                used_ports.add(node.id)
+
+    return used_ports
 
 
 def split_file_into_module(filename):
