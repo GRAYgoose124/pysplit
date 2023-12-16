@@ -1,5 +1,7 @@
 import sys, shutil, os
 import argparse
+import logging
+
 from pathlib import Path
 
 from .split import split_file_into_module
@@ -14,6 +16,12 @@ def argparser():
 
 
 def main():
+    logging.basicConfig(
+        level=logging.INFO, format="%(filename)s.%(funcName)s:%(lineno)s %(message)s"
+    )
+    # debug this package only
+    logging.getLogger("monosplit").setLevel(logging.DEBUG)
+
     args = argparser().parse_args()
     created_filenames = split_file_into_module(args.filename)
     print(f"Created files: {created_filenames} from {args.filename}.")
