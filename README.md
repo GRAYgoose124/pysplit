@@ -1,7 +1,7 @@
 
 # monosplit
 
-monosplit is your friendly neighborhood Python file splitter! It takes a hefty Python file and splits it into a neat module with smaller, manageable files. It's not too stupid, either!  It figures out which imports are needed in each new file and keeps them intact. If a main function or standard main block is detected, it's moved the new module main at `__main__.py`.
+monosplit is your friendly neighborhood Python file splitter! It takes a hefty Python file and splits it into a neat module with smaller, manageable files. It's not too stupid, either!  It figures out which imports are needed in each new file and keeps them intact. If a main function or standard main block is detected, it is moved to the `__main__.py`.
 
 # Installation
 monosplit is available on PyPI! Install it with pip:

@@ -50,33 +50,6 @@ def detect_main_block(tree, source) -> list[str]:
         return None, None
 
 
-class ExtractExportsVisitor(ast.NodeVisitor):
-    def __init__(self):
-        self.exports = []
-
-    def visit_FunctionDef(self, node):
-        if node.col_offset == 0:
-            self.exports.append(node.name)
-
-    def visit_ClassDef(self, node):
-        if node.col_offset == 0:
-            self.exports.append(node.name)
-
-
-class ExtractImportsVisitor(ast.NodeVisitor):
-    def __init__(self):
-        self.imports = {}
-
-    def visit_Import(self, node):
-        for alias in node.names:
-            self.imports[alias.name] = "import " + alias.name
-
-    def visit_ImportFrom(self, node):
-        module = node.module
-        for alias in node.names:
-            self.imports[alias.name] = f"from {module} import {alias.name}"
-
-
 def extract_exports(lines):
     return [
         match.group(2)
@@ -254,6 +227,7 @@ def split_file_into_module(filename):
             main_file.write(main_block)
         created_filenames.append("__main__.py")
         # Maybe generalize for below: Only real difference is how main deals with interports.
+        # We are depending on tld's being included as part of up_to_first_pragma.
         # file_contents["__main__.py"] = main_block
         # tree = ast.parse(main_block)
         # exports["__main__.py"] = parse_body_for_used_ports(
